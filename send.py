@@ -1,14 +1,12 @@
 import pika
 import time
+import random
 
 credentials = pika.PlainCredentials('testing', 'password')
 connection = pika.BlockingConnection(pika.ConnectionParameters('trekdev.thewcl.com', 5672, '/', credentials))
 channel = connection.channel()
+message = 'testmessage'
 
-channel.queue_declare(queue='testQueue')
+channel.exchange_declare(exchange='logs', exchange_type='fanout')
 
-channel.basic_publish(exchange='',routing_key='testQueue',body='Test Message from Python')
-print("Sent message to queue testQueue")
-
-while(1):
-    time.sleep(1)
+channel.basic_publish(exchange='logs', routing_key='', body=message)
