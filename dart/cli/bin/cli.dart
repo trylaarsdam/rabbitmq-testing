@@ -25,8 +25,11 @@ void main(List<String> arguments) async {
           }));*/
   var channel = await client.channel();
   var exchange = await channel.exchange("logs", ExchangeType.FANOUT);
-  var consumer = await exchange.bindPrivateQueueConsumer(null);
-  consumer.listen((message) {
-    print("Message recieved from exchange: ${message.payloadAsString}");
-  });
+  var queue = await channel.queue("", autoDelete: true);
+  await queue
+      .bind(exchange, null)
+      .then((Queue queue) => queue.consume())
+      .then((Consumer consumer) => consumer.listen((message) {
+            print("Message recieved from exchange: ${message.payloadAsString}");
+          }));
 }
