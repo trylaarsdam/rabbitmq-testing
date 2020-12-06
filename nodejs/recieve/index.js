@@ -1,16 +1,31 @@
 const amqp = require('amqplib');
 
 amqp.connect("amqp://testing:password@trek.thewcl.com:5672").then(function(connection){
+    process.once('SIGINT', function() {
+        connection.close();
+    });
     return connection.createChannel().then(function(channel){
         var exchangeName = 'logs';
         var exchange = channel.assertExchange(exchangeName, 'fanout', {durable: false});
 
-        return exchange.then(function() {
-            channel.publish(exchangeName, '', Buffer.from("Test message from nodejs"));
-            return channel.close();
+        exchange = exchange.then(function() {
+            return channel.assertQueue('', {exclusive: true, autoDelete: true});
         });
-    }).finally(function(){
-        connection.close();
+        exchange = exchange.then(function(queue) {
+            return channel.bindQueue(queue.queue, 'logs', '').then(function() {
+                return queue.queue;
+            });
+        });
+        exchange = exchange.then(function(queue) {
+            return channel.consume(queue, logMessage);
+        });
+        return exchange.then(function() {
+            console.log("Waiting for messages from queue");
+        });
+
+        function logMessage (msg){
+            console.log(msg.content.toString());
+        }
     });
 }).catch(console.warn);
 
