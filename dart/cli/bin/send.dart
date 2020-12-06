@@ -26,4 +26,7 @@ void main(List<String> arguments) async {
   var channel = await client.channel();
   var exchange = await channel.exchange("logs", ExchangeType.FANOUT);
   exchange.publish("Test message from dart", null);
+  await channel.close();
+  await client.close();
+  exit(1);
 }
