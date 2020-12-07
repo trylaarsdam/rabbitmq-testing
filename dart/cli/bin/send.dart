@@ -16,13 +16,6 @@ void main(List<String> arguments) async {
     exit(0);
   });
 
-  /*client
-      .channel()
-      .then((Channel channel) => channel.queue('hello'))
-      .then((Queue queue) => queue.consume())
-      .then((Consumer consumer) => consumer.listen((AmqpMessage message) {
-            print('Recieved string: ${message.payloadAsString}');
-          }));*/
   var channel = await client.channel();
   var exchange = await channel.exchange("logs", ExchangeType.FANOUT);
   exchange.publish("Test message from dart", null);
