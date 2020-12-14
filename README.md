@@ -1,1 +1,1 @@
-rabbitmq-testing
+RabbitMQ/AMQP Testing
